@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import useDebounce from '@/src/hooks/useDebounce';
-import axios from '@/src/lib/axios';
+import axiosInstance from '@/src/lib/axios';
 
 const SearchUsers = () => {
   const [inputValue, setInputValue] = useState('');
@@ -11,7 +11,7 @@ const SearchUsers = () => {
     
     console.log('Fetching results for:', query);
 
-    const response = await axios.get(`/users/search?query=${query}&page=1&limit=10`);
+    const response = await axiosInstance.get(`/users/search?query=${query}&page=1&limit=10`);
     console.log("Search response:", response);
   };
 

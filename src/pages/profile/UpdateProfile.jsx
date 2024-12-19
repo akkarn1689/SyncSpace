@@ -14,7 +14,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { Label } from '../../components/ui/label';
 import { ImagePlus, Loader2 } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
-import axios from '../../lib/axios';
+import axiosInstance from '../../lib/axios';
 import { setUser } from '../../features/auth/authSlice';
 
 const UpdateProfileModal = ({ isOpen, onClose, user }) => {
@@ -98,7 +98,7 @@ const UpdateProfileModal = ({ isOpen, onClose, user }) => {
             // console.log("user:", user);
             // Profile update API call
             if (Object.keys(updates).length > 0) {
-                const response = await axios.put(`/users/${user._id}/profile`, { ...updates });
+                const response = await axiosInstance.put(`/users/${user._id}/profile`, { ...updates });
 
                 if (response.status!=200) {
                     throw new Error('Failed to update profile');

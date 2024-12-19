@@ -6,7 +6,7 @@ import { SOCKET_EVENTS } from '../../../services/socket/socketEvents';
 import ConversationHeader from './ConversationHeader';
 import MessageContainer from './MessageContainer';
 import ChatInput from './ChatInput';
-import axios from '../../../lib/axios';
+import axiosInstance from '../../../lib/axios';
 
 const ConversationChatRoom = ({ conversation }) => {
     const [messages, setMessages] = useState([]);
@@ -33,7 +33,7 @@ const ConversationChatRoom = ({ conversation }) => {
 
     const fetchMessages = async (conversationId, page) => {
         try {
-            const response = await axios.get(
+            const response = await axiosInstance.get(
                 `/messages/conversations/${conversationId}?page=${page}&limit=20`
             );
             return response.data;

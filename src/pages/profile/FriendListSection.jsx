@@ -11,7 +11,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '../../components/ui/alert-dialog';
-import axios from '../../lib/axios'
+import axiosInstance from '../../lib/axios'
 
 // FriendListItem Component
 const FriendListItem = ({ friend, onRemoveFriend }) => {
@@ -22,7 +22,7 @@ const FriendListItem = ({ friend, onRemoveFriend }) => {
         try {
             setIsRemoving(true);
             // Call the API to remove friend
-            const response = await axios.delete(`/users/${friend._id}/remove`);
+            const response = await axiosInstance.delete(`/users/${friend._id}/remove`);
 
             if (!response.ok) throw new Error('Failed to remove friend');
 

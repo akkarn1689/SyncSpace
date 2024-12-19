@@ -1,7 +1,7 @@
 // hooks/useFriendRequests.js
 import { useState, useEffect } from 'react';
 import { useToast } from '../hooks/use-toast';
-import axios from '../lib/axios';
+import axiosInstance from '../lib/axios';
 
 export const useFriendRequests = (user) => {
     const { toast } = useToast();
@@ -32,7 +32,7 @@ export const useFriendRequests = (user) => {
     const handleAcceptRequest = async (requesterId) => {
         try {
             setActionLoading(true);
-            const response = await axios.patch(`/users/${requesterId}/accept`);
+            const response = await axiosInstance.patch(`/users/${requesterId}/accept`);
 
             if (!response.ok) throw new Error('Failed to accept request');
 

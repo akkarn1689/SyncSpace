@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import ConversationList from '@/src/features/chat/components/ConversationList';
 import ConversationChatRoom from '@/src/features/chat/components/ChatRoom';
-import axios from '../../lib/axios'
+import axiosInstanceInstance from '../../lib/axios'
 // import { fetchConversations } from '../../services/chatService';
 
 const ChatPage = () => {
@@ -12,7 +12,7 @@ const ChatPage = () => {
 
   const fetchConversation = async (conversationId) => {
     try {
-      const response = await axios.get(`/conversations/${conversationId}`);
+      const response = await axiosInstance.get(`/conversations/${conversationId}`);
       return await response.json();
     } catch (error) {
       console.error('Error fetching conversation:', error);
@@ -22,7 +22,7 @@ const ChatPage = () => {
 
   const fetchConversations = async () => {
     try {
-      const response = await axios.get('/conversations');
+      const response = await axiosInstance.get('/conversations');
       console.log("response", response);
       return response.data;
     } catch (error) {

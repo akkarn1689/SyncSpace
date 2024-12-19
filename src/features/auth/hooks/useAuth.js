@@ -2,8 +2,8 @@
 import { useSelector, useDispatch } from 'react-redux';
 // import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import axios from '../../../lib/axios';
-import axios from '../../../lib/axios';
+// import axiosInstance from '../../../lib/axios';
+import axiosInstance from '../../../lib/axios';
 import { setCredentials, setUser, logout, setLoading, setError } from '../authSlice';
 
 export const useAuth = () => {
@@ -15,7 +15,7 @@ export const useAuth = () => {
     const login = async (identifier, password) => {
         try {
             dispatch(setLoading(true));
-            const response = await axios.post('/auth/login', { identifier, password });
+            const response = await axiosInstance.post('/auth/login', { identifier, password });
             console.log('Login response:', response.data); // Check if token and user are present
             dispatch(setCredentials(response.data));
             console.log('Token stored in localStorage:', localStorage.getItem('auth_token')); // Verify the storage
@@ -32,7 +32,7 @@ export const useAuth = () => {
     const register = async (userData) => {
         try {
             dispatch(setLoading(true));
-            const response = await axios.post('/auth/register', userData);
+            const response = await axiosInstance.post('/auth/register', userData);
             console.log(response.data);
             dispatch(setCredentials(response.data));
             navigate('/profile');
@@ -46,7 +46,7 @@ export const useAuth = () => {
     const fetchProfile = async () => {
         try {
             dispatch(setLoading(true));
-            const response = await axios.get('/auth/profile');
+            const response = await axiosInstance.get('/auth/profile');
             dispatch(setUser(response.data));
         } catch (err) {
             dispatch(setError(err.response?.data?.message || 'Failed to fetch profile'));
