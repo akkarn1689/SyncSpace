@@ -9,7 +9,7 @@ const axiosInstance = axios.create({
     withCredentials: true,
 });
 
-instance.interceptors.request.use(
+axiosInstance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem(import.meta.env.VITE_AUTH_TOKEN_KEY);
         if (token) {
