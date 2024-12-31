@@ -10,6 +10,9 @@ export default defineConfig({
     },
   },
   build: {
+    rollupOptions: {
+      external: ['axios'],
+    },
     chunkSizeWarningLimit: 1600
   }
 })
