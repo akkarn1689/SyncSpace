@@ -1,108 +1,170 @@
-// src/pages/auth/AuthPage.jsx
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { Input } from '../../components/ui/input';
-import { Button } from '../../components/ui/button';
-import { useAuth } from '../../features/auth/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
+import { 
+  Card, 
+  CardContent,
+  Typography,
+  Tabs,
+  Tab,
+  TextField,
+  Button,
+  Box,
+  Alert,
+  styled 
+} from '@mui/material';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { grey } from '@mui/material/colors';
+
+const StyledCard = styled(Card)(({ theme }) => ({
+  backgroundColor: theme.palette.common.black,
+  color: theme.palette.common.white,
+  maxWidth: '28rem',
+  margin: '5rem auto',
+  background: grey[900],
+  padding: theme.spacing(2)
+}));
+
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+  marginBottom: theme.spacing(3),
+  '& .MuiTabs-indicator': {
+    backgroundColor: theme.palette.primary.main
+  }
+}));
+
+const StyledTab = styled(Tab)(({ theme }) => ({
+  color: theme.palette.common.white,
+  '&.Mui-selected': {
+    color: theme.palette.primary.main
+  }
+}));
 
 const AuthPage = () => {
-    const { login, register, isLoading, error, isAuthenticated } = useAuth();
-    const [loginData, setLoginData] = useState({ identifier: '', password: '' });
-    const [registerData, setRegisterData] = useState({
-        username: '',
-        email: '',
-        password: '',
-        mobile: '',
-    });
+  const { login, register, isLoading, error, isAuthenticated } = useAuth();
+  const [activeTab, setActiveTab] = useState('login');
+  const [loginData, setLoginData] = useState({ identifier: '', password: '' });
+  const [registerData, setRegisterData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    mobile: ''
+  });
 
-    if (isAuthenticated) {
-        return <Navigate to="/profile" replace />;
+  if (isAuthenticated) {
+    return <Navigate to="/profile" replace />;
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (activeTab === 'login') {
+      login(loginData.identifier, loginData.password);
+    } else {
+      register(registerData);
     }
+  };
 
-    const handleLogin = (e) => {
-        e.preventDefault();
-        login(loginData.identifier, loginData.password);
-    };
+  const renderLoginForm = () => (
+    <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <TextField
+        fullWidth
+        placeholder="Username, Email or Mobile"
+        value={loginData.identifier}
+        onChange={(e) => setLoginData({ ...loginData, identifier: e.target.value })}
+        variant="outlined"
+        sx={{ input: { color: 'white' } }}
+      />
+      <TextField
+        fullWidth
+        type="password"
+        placeholder="Password"
+        value={loginData.password}
+        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+        variant="outlined"
+        sx={{ input: { color: 'white' } }}
+      />
+      <Button
+        type="submit"
+        variant="contained"
+        fullWidth
+        disabled={isLoading}
+      >
+        {isLoading ? 'Loading...' : 'Login'}
+      </Button>
+    </Box>
+  );
 
-    const handleRegister = (e) => {
-        e.preventDefault();
-        register(registerData);
-    };
+  const renderRegisterForm = () => (
+    <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <TextField
+        fullWidth
+        placeholder="Username"
+        value={registerData.username}
+        onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
+        variant="outlined"
+        sx={{ input: { color: 'white' } }}
+      />
+      <TextField
+        fullWidth
+        type="email"
+        placeholder="Email"
+        value={registerData.email}
+        onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+        variant="outlined"
+        sx={{ input: { color: 'white' } }}
+      />
+      <TextField
+        fullWidth
+        type="tel"
+        placeholder="Mobile"
+        value={registerData.mobile}
+        onChange={(e) => setRegisterData({ ...registerData, mobile: e.target.value })}
+        variant="outlined"
+        sx={{ input: { color: 'white' } }}
+      />
+      <TextField
+        fullWidth
+        type="password"
+        placeholder="Password"
+        value={registerData.password}
+        onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+        variant="outlined"
+        sx={{ input: { color: 'white' } }}
+      />
+      <Button
+        type="submit"
+        variant="contained"
+        fullWidth
+        disabled={isLoading}
+      >
+        {isLoading ? 'Loading...' : 'Register'}
+      </Button>
+    </Box>
+  );
 
-    return (
-        <div className="bg-black container mx-auto max-w-md mt-20">
-            <Card className="bg-black text-white">
-                <CardHeader>
-                    <CardTitle className="text-center text-lg">Welcome to SyncSpace</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Tabs defaultValue="login">
-                        <TabsList className="bg-black grid w-full grid-cols-2">
-                            <TabsTrigger value="login">Login</TabsTrigger>
-                            <TabsTrigger value="register">Register</TabsTrigger>
-                        </TabsList>
+  return (
+    <StyledCard>
+      <Typography variant="h6" align="center" gutterBottom>
+        Welcome to SyncSpace
+      </Typography>
+      <CardContent>
+        <StyledTabs
+          value={activeTab}
+          onChange={(_, newValue) => setActiveTab(newValue)}
+          variant="fullWidth"
+        >
+          <StyledTab label="Login" value="login" />
+          <StyledTab label="Register" value="register" />
+        </StyledTabs>
 
-                        <TabsContent value="login">
-                            <form onSubmit={handleLogin} className="space-y-4">
-                                <Input
-                                    type="text"
-                                    placeholder="Username, Email or Mobile"
-                                    value={loginData.identifier}
-                                    onChange={(e) => setLoginData({ ...loginData, identifier: e.target.value })}
-                                />
-                                <Input
-                                    type="password"
-                                    placeholder="Password"
-                                    value={loginData.password}
-                                    onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                                />
-                                <Button type="submit" className="w-full" disabled={isLoading}>
-                                    {isLoading ? 'Loading...' : 'Login'}
-                                </Button>
-                            </form>
-                        </TabsContent>
+        {activeTab === 'login' ? renderLoginForm() : renderRegisterForm()}
 
-                        <TabsContent value="register">
-                            <form onSubmit={handleRegister} className="space-y-4">
-                                <Input
-                                    placeholder="Username"
-                                    value={registerData.username}
-                                    onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
-                                />
-                                <Input
-                                    type="email"
-                                    placeholder="Email"
-                                    value={registerData.email}
-                                    onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                                />
-                                <Input
-                                    type="tel"
-                                    placeholder="Mobile"
-                                    value={registerData.mobile}
-                                    onChange={(e) => setRegisterData({ ...registerData, mobile: e.target.value })}
-                                />
-                                <Input
-                                    type="password"
-                                    placeholder="Password"
-                                    value={registerData.password}
-                                    onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                                />
-                                <Button type="submit" className="w-full" disabled={isLoading}>
-                                    {isLoading ? 'Loading...' : 'Register'}
-                                </Button>
-                            </form>
-                        </TabsContent>
-                    </Tabs>
-
-                    {error && (
-                        <p className="text-destructive text-sm mt-4 text-center">{error}</p>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
-    );
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
+      </CardContent>
+    </StyledCard>
+  );
 };
 
 export default AuthPage;

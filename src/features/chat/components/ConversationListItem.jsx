@@ -1,48 +1,60 @@
 import React from 'react';
-import { Avatar, AvatarImage, AvatarFallback } from "@/src/components/ui/avatar";
-import { cn } from "@/lib/utils";
+import { Avatar, Box, Typography, ListItem, ListItemAvatar, ListItemText } from '@mui/material';
 import { useAuth } from '../../auth/hooks/useAuth';
 
 const ConversationListItem = ({ conversation, isActive, onClick }) => {
-    // const initials = conversation.title?.split(' ').map(n => n[0]).join('') || '?';
-    const { user } = useAuth();
-    console.log(`User: `, user);
+   const { user } = useAuth();
+   const otherUser = conversation.users.find(u => u?._id !== user?._id);
 
-    const otherUser = conversation.users.find(u => u?._id !== user?._id);
-    console.log('otherUser: ', otherUser);
-
-    console.log(`Conversation: `, conversation);
-    return (
-        <div
-            onClick={() => onClick(conversation)}
-            className={cn(
-                "px-4 py-2 flex items-center gap-3 cursor-pointer border-2 rounded-md mx-2 my-1 bg-black text-white border-b-2 hover:bg-gray-00 transition-colors",
-                isActive && "bg-gray-700"
-            )}
-        >
-            <Avatar>
-                <AvatarImage src={`https://ui-avatars.com/api/?name=${otherUser.name || otherUser.username}`} />
-                <AvatarFallback>{otherUser.name || otherUser.username}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-start">
-                    <h3 className="font-medium truncate">{otherUser.name}</h3>
-                    {/* <span className="text-xs text-gray-500">
-                        {conversation?.createdAt?.toLocaleTimeString()}
-                    </span> */}
-                </div>
-                <div className="flex justify-between items-start">
-                    <h3 className="font-small italic text-gray-400 truncate">{otherUser.username}</h3>
-                    {/* <span className="text-xs text-gray-500">
-                        {conversation?.createdAt?.toLocaleTimeString()}
-                    </span> */}
-                </div>
-                {/* <p className="text-sm text-gray-500 truncate">
-                    {otherUser.username}
-                </p> */}
-            </div>
-        </div>
-    );
+   return (
+       <ListItem
+           onClick={() => onClick(conversation)}
+           sx={{
+               px: 1,
+               py: 0.8,
+               my: 0.5,
+               mx: 0.2,
+               borderRadius: 1,
+            //    border: 1,
+               borderColor: isActive ? 'primary.main' : 'divider',
+               bgcolor: isActive ? 'action.selected' : 'background.paper',
+               cursor: 'pointer',
+               '&:hover': {
+                   bgcolor: 'action.hover',
+               },
+               transition: 'all 0.2s ease-in-out'
+           }}
+       >
+           <ListItemAvatar>
+               <Avatar 
+                   src={`https://ui-avatars.com/api/?name=${otherUser.name || otherUser.username}`}
+                   alt={otherUser.name || otherUser.username}
+               />
+           </ListItemAvatar>
+           <ListItemText
+               primary={
+                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                       <Typography variant="subtitle1" noWrap fontWeight="medium">
+                           {otherUser.name}
+                       </Typography>
+                   </Box>
+               }
+            //    secondary={
+            //        <Typography 
+            //            variant="body2" 
+            //            sx={{ 
+            //                color: 'text.secondary',
+            //                fontStyle: 'italic',
+            //                mt: 0.5
+            //            }} 
+            //            noWrap
+            //        >
+            //            @{otherUser.username}
+            //        </Typography>
+            //    }
+           />
+       </ListItem>
+   );
 };
 
 export default ConversationListItem;

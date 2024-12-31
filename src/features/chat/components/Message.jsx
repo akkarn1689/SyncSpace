@@ -1,124 +1,190 @@
 import React, { memo, useState, forwardRef } from 'react';
-import { cn } from "@/lib/utils";
-import { Button } from "@/src/components/ui/button";
-import { MoreVertical } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/src/components/ui/dropdown-menu";
+import { 
+  IconButton,
+  Menu,
+  MenuItem,
+  Paper,
+  Typography,
+  Box,
+  styled
+} from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DoneIcon from '@mui/icons-material/Done';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import zIndex from '@mui/material/styles/zIndex';
 
-const Message = memo(
-  forwardRef(({
-    message,
-    isOutgoing,
-    onCopy,
-    onDelete,
-    onForward,
-    onReply
-  }, ref) => {
-    const [isHovered, setIsHovered] = useState(false);
+// Styled components for custom message bubble effects
+const MessageBubble = styled(Paper)(({ theme, isOutgoing }) => ({
+  position: 'relative',
+  maxWidth: '70%',
+  padding: theme.spacing(1, 1),
+  backgroundColor: isOutgoing ? theme.palette.grey[200] : theme.palette.grey[900],
+  color: isOutgoing ? theme.palette.primary.contrastText : theme.palette.common.white,
+  borderRadius: theme.spacing(1.5),
+  [isOutgoing ? 'borderTopRightRadius' : 'borderTopLeftRadius']: theme.spacing(0.05),
+  transition: 'transform 0.2s ease-in-out',
+  '&:hover': {
+    transform: 'scale(1.02)',
+  },
+  // '&::before': {
+  //   content: '""',
+  //   position: '',
+  //   top: 0,
+  //   zIndex: 0,
+  //   [isOutgoing ? 'right' : 'left']: 0,
+  //   width: theme.spacing(2),
+  //   height: theme.spacing(2),
+  //   backgroundColor: isOutgoing ? theme.palette.success.light : theme.palette.grey[900],
+  //   transform: `translate(${isOutgoing ? '0%' : '0%'}, -0%) rotate(90deg)`,
+  // }
+}));
 
-    const messageActions = [
-      { label: 'Reply', onClick: () => onReply?.(message) },
-      { label: 'Forward', onClick: () => onForward?.(message) },
-      { label: 'Copy', onClick: () => onCopy?.(message.text) },
-      { label: 'Delete', onClick: () => onDelete?.(message), className: 'text-destructive' }
-    ];
+const MessageContainer = styled(Box)(({ theme, isOutgoing }) => ({
+  display: 'flex',
+  alignItems: 'flex-end',
+  gap: theme.spacing(1),
+  marginBottom: theme.spacing(0.5),
+  padding: theme.spacing(0.5, 2),
+  justifyContent: isOutgoing ? 'flex-end' : 'flex-start',
+  '& .MuiIconButton-root': {
+    opacity: 0,
+    transition: 'opacity 0.2s ease-in-out',
+  },
+  '&:hover .MuiIconButton-root': {
+    opacity: 1,
+  }
+}));
 
-    const formattedTime = new Date(message.date).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
+const Message = memo(forwardRef(({
+  message,
+  isOutgoing,
+  onCopy,
+  onDelete,
+  onForward,
+  onReply
+}, ref) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
 
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          "group flex items-end gap-2 mb-1 px-4 py-1",
-          isOutgoing ? "justify-end" : "justify-start"
-        )}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        role="article"
-        aria-label={`Message sent ${isOutgoing ? 'by you' : 'to you'} at ${formattedTime}`}
-      >
-        {/* Message Options Dropdown */}
-        <div className={cn(
-          "opacity-0 group-hover:opacity-100 transition-opacity",
-          "self-center",
-          isOutgoing ? "order-first" : "order-last"
-        )}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                aria-label="Message options"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align={isOutgoing ? "end" : "start"}>
-              {messageActions.map((action) => (
-                <DropdownMenuItem
-                  key={action.label}
-                  onClick={action.onClick}
-                  className={action.className}
-                >
-                  {action.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
 
-        {/* Message Bubble */}
-        <div
-          className={cn(
-            "relative max-w-[70%] py-2 px-4 shadow-sm",
-            "transform transition-transform group-hover:scale-[1.05]",
-            isOutgoing
-              ? "bg-green-600 text-white rounded-2xl rounded-tr-sm"
-              : "bg-gray-900 rounded-2xl rounded-tl-sm",
-            "before:absolute before:top-0 before:w-4 before:h-0",
-            isOutgoing
-              ? "before:right-0 before:transform before:translate-x-1/2 before:-translate-y-1/2 before:rotate-45 before:bg-green-600"
-              : "before:left-0 before:transform before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-45 before:bg-gray-900"
-          )}
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const messageActions = [
+    { label: 'Reply', onClick: () => { onReply?.(message); handleClose(); } },
+    { label: 'Forward', onClick: () => { onForward?.(message); handleClose(); } },
+    { label: 'Copy', onClick: () => { onCopy?.(message.text); handleClose(); } },
+    { 
+      label: 'Delete', 
+      onClick: () => { onDelete?.(message); handleClose(); },
+      sx: { color: 'error.main' }
+    }
+  ];
+
+  const formattedTime = new Date(message.date).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+
+  return (
+    <MessageContainer
+      ref={ref}
+      isOutgoing={isOutgoing}
+      role="article"
+      aria-label={`Message sent ${isOutgoing ? 'by you' : 'to you'} at ${formattedTime}`}
+    >
+      {/* Message Options Menu */}
+      {isOutgoing ? (
+        <IconButton
+          size="small"
+          onClick={handleClick}
+          aria-label="Message options"
+          aria-controls={open ? 'message-menu' : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? 'true' : undefined}
         >
-          <div className="relative">
-            <p className="text-sm flex justify-start break-words whitespace-pre-wrap">
-              {message.text}
-            </p>
-            <div className={cn(
-              "flex justify-end items-start gap-0 mt-0",
-              isOutgoing ? "text-gray-100" : "text-gray-500"
-            )}>
-              <time
-                className="text-xs"
-                dateTime={message.date}
-              >
-                {formattedTime}
-              </time>
-              {isOutgoing && (
-                <span className="text-xs">
-                
-                {message.status==='sent' ? '✓': null}
-                {message.status==='delivered' ? '✓✓': null}
-                
-                </span> // Add proper status icon
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  })
-);
+          <MoreVertIcon fontSize="small" />
+        </IconButton>
+      ) : null}
+
+      {/* Message Bubble */}
+      <MessageBubble isOutgoing={isOutgoing} elevation={1}>
+        <Typography variant="body2" sx={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+          {message.text}
+        </Typography>
+        
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'flex-end', 
+          alignItems: 'center', 
+          gap: 0.1, 
+          mt: 0.1 
+        }}>
+          <Typography
+            variant="caption"
+            component="time"
+            dateTime={message.date}
+            sx={{ opacity: 0.8 }}
+          >
+            {formattedTime}
+          </Typography>
+          
+          {isOutgoing && (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {message.status === 'sent' && <DoneIcon sx={{ fontSize: 12, opacity: 0.8 }} />}
+              {message.status === 'delivered' && <DoneAllIcon sx={{ fontSize: 12, opacity: 0.8 }} />}
+            </Box>
+          )}
+        </Box>
+      </MessageBubble>
+
+      {/* Message Options Menu for incoming messages */}
+      {!isOutgoing ? (
+        <IconButton
+          size="small"
+          onClick={handleClick}
+          aria-label="Message options"
+          aria-controls={open ? 'message-menu' : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? 'true' : undefined}
+        >
+          <MoreVertIcon fontSize="small" />
+        </IconButton>
+      ) : null}
+
+      {/* Dropdown Menu */}
+      <Menu
+        id="message-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: isOutgoing ? 'left' : 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: isOutgoing ? 'right' : 'left',
+        }}
+      >
+        {messageActions.map((action) => (
+          <MenuItem
+            key={action.label}
+            onClick={action.onClick}
+            sx={action.sx}
+          >
+            {action.label}
+          </MenuItem>
+        ))}
+      </Menu>
+    </MessageContainer>
+  );
+}));
 
 Message.displayName = 'Message';
 

@@ -1,137 +1,168 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../features/auth/hooks/useAuth';
-import { Button } from '../ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '../ui/dropdown-menu';
+ AppBar,
+ Box,
+ Button,
+ Container,
+ IconButton,
+ Menu,
+ MenuItem,
+ Toolbar,
+ Typography,
+ Divider,
+} from '@mui/material';
 import {
-  User,
-  Users, // For Groups
-  MessageCircle, // For Chat
-  Bell // For Notifications
-} from 'lucide-react';
+ Person as UserIcon,
+ Group as GroupIcon,
+ Chat as ChatIcon,
+ Notifications as NotificationsIcon
+} from '@mui/icons-material';
 import SearchUsers from './SearchUsers';
 
 const Navbar = () => {
-  const { user, logout, isAuthenticated } = useAuth();
+ const { user, logout, isAuthenticated } = useAuth();
+ const [anchorEl, setAnchorEl] = React.useState(null);
 
-  const NavigationLinks = ({ className }) => (
-    <div className={className}>
-      <Link
-        to="/groups"
-        className="text-white hover:text-gray-400 transition-colors flex items-center gap-2"
-      >
-        <Users size={20} />
-        Groups
-      </Link>
-      <Link
-        to="/chat"
-        className="text-white hover:text-gray-400 transition-colors flex items-center gap-2"
-      >
-        <MessageCircle size={20} />
-        Chat
-      </Link>
-      <Link
-        to="/notifications"
-        className="text-white hover:text-gray-400 transition-colors flex items-center gap-2"
-      >
-        <Bell size={20} />
-        Notifications
-      </Link>
-    </div>
-  );
+ const handleMenuOpen = (event) => {
+   setAnchorEl(event.currentTarget);
+ };
 
-  return (
-    <nav className="sticky">
-      <div className="lg:mx-auto lg:w-[100%] lg:px-[5%] border-b sm:mx-6">
-        <div className="flex items-center justify-between h-16">
-          {/* Left section with brand */}
-          <div className="flex items-center space-x-8">
-            <Link to="/" className="flex justify-start items-center text-xl font-bold">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-6 w-6 m-2"
-              >
-                <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
-              </svg>
-              SyncSpace
-            </Link>
-          </div>
+ const handleMenuClose = () => {
+   setAnchorEl(null);
+ };
 
-          <div className="flex justify-center items-center space-x-8">
-            <SearchUsers />
-          </div>
+ const NavigationLinks = ({ isMobile = false }) => {
+   const links = [
+     { to: '/groups', icon: <GroupIcon />, label: 'Groups' },
+     { to: '/chat', icon: <ChatIcon />, label: 'Chat' },
+     { to: '/notifications', icon: <NotificationsIcon />, label: 'Notifications' }
+   ];
 
-          {/* Right section with auth menu */}
-          <div className="flex items-center">
-            {/* Navigation links - visible on md and larger screens */}
-            <NavigationLinks className="hidden md:flex items-center space-x-6 mr-6" />
+   if (isMobile) {
+     return links.map((link) => (
+       <MenuItem 
+         key={link.to} 
+         component={Link} 
+         to={link.to} 
+         onClick={handleMenuClose}
+         sx={{ gap: 1 }}
+       >
+         {link.icon}
+         {link.label}
+       </MenuItem>
+     ));
+   }
 
-            {isAuthenticated ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="space-x-2">
-                    <User className="h-5 w-5" />
-                    <span>{user?.username || 'Menu'}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="" align="end">
-                  {/* Navigation links - visible on small screens only */}
-                  <div className="md:hidden">
-                    <DropdownMenuItem className="cursor-pointer" asChild>
-                      <Link to="/groups" className="flex items-center gap-2">
-                        <Users size={18} />
-                        Groups
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer" asChild>
-                      <Link to="/chat" className="flex items-center gap-2">
-                        <MessageCircle size={18} />
-                        Chat
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer" asChild>
-                      <Link to="/notifications" className="flex items-center gap-2">
-                        <Bell size={18} />
-                        Notifications
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </div>
-                  <DropdownMenuItem className="cursor-pointer" asChild>
-                    <Link to="/profile" className="flex items-center gap-2">
-                      <User size={18} />
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer" onClick={logout}>
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link to="/login">
-                <Button variant="ghost" size="sm">
-                  Login
-                </Button>
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
+   return (
+     <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3 }}>
+       {links.map((link) => (
+         <Button
+           key={link.to}
+           component={Link}
+           to={link.to}
+           color="inherit"
+           startIcon={link.icon}
+         >
+           {link.label}
+         </Button>
+       ))}
+     </Box>
+   );
+ };
+
+ return (
+   <AppBar position="sticky">
+     <Container maxWidth="xl">
+       <Toolbar>
+         {/* Logo */}
+         <Typography
+           variant="h6"
+           component={Link}
+           to="/"
+           sx={{
+             display: 'flex',
+             alignItems: 'center',
+             textDecoration: 'none',
+             color: 'inherit'
+           }}
+         >
+           <Box component="svg"
+             xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             strokeWidth="2"
+             strokeLinecap="round"
+             strokeLinejoin="round"
+             sx={{ height: 24, width: 24, mr: 1 }}
+           >
+             <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
+           </Box>
+           SyncSpace
+         </Typography>
+
+         {/* Search */}
+         <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+           <SearchUsers />
+         </Box>
+
+         {/* Navigation & Auth */}
+         <NavigationLinks />
+         
+         {isAuthenticated ? (
+           <>
+             <IconButton
+               color="inherit"
+               onClick={handleMenuOpen}
+               sx={{ ml: 2 }}
+             >
+               <UserIcon />
+             </IconButton>
+             <Menu
+               anchorEl={anchorEl}
+               open={Boolean(anchorEl)}
+               onClose={handleMenuClose}
+               anchorOrigin={{
+                 vertical: 'bottom',
+                 horizontal: 'right',
+               }}
+             >
+               <Box sx={{ display: { md: 'none' } }}>
+                 <NavigationLinks isMobile />
+                 <Divider />
+               </Box>
+               <MenuItem 
+                 component={Link} 
+                 to="/profile"
+                 onClick={handleMenuClose}
+                 sx={{ gap: 1 }}
+               >
+                 <UserIcon fontSize="small" />
+                 Profile
+               </MenuItem>
+               <MenuItem onClick={() => {
+                 handleMenuClose();
+                 logout();
+               }}>
+                 Logout
+               </MenuItem>
+             </Menu>
+           </>
+         ) : (
+           <Button
+             component={Link}
+             to="/login"
+             color="inherit"
+           >
+             Login
+           </Button>
+         )}
+       </Toolbar>
+     </Container>
+   </AppBar>
+ );
 };
 
 export default Navbar;

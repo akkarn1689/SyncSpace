@@ -1,143 +1,180 @@
+// ProfilePage.jsx
 import React, { useState } from 'react';
+import { 
+    Container, Paper, Avatar, Typography, Box, Tabs, Tab, Button,
+    Grid, Card, CardContent, IconButton, useTheme
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle
-} from '../../components/ui/card';
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger
-} from '../../components/ui/tabs';
-import {
-    UserCircle2,
-    Users,
-    Mail,
-    Phone,
-    CalendarDays,
-    Pencil
-} from 'lucide-react';
-import { Button } from '../../components/ui/button';
+    AccountCircle, Edit, Email, Phone, 
+    CalendarToday, Person
+} from '@mui/icons-material';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import UpdateProfileModal from './UpdateProfile';
 import FriendListSection from './FriendListSection';
 
+const StyledPaper = styled(Paper)(({ theme }) => ({
+    background: `linear-gradient(180deg, ${theme.palette.grey[900]} 0%, ${theme.palette.common.black} 100%)`,
+    backdropFilter: 'blur(10px)',
+    border: `1px solid ${theme.palette.grey[800]}`,
+}));
+
+const ProfileHeader = styled(Box)(({ theme }) => ({
+    padding: theme.spacing(4),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+}));
+
+const GradientTypography = styled(Typography)(({ theme }) => ({
+    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+    backgroundClip: 'text',
+    WebkitBackgroundClip: 'text',
+    color: 'transparent',
+}));
+
+function TabPanel({ children, value, index, ...other }) {
+    return (
+        <div role="tabpanel" hidden={value !== index} {...other}>
+            {value === index && <Box p={3}>{children}</Box>}
+        </div>
+    );
+}
+
 const ProfilePage = () => {
+    const theme = useTheme();
     const { user, isLoading } = useAuth();
-    const [activeTab, setActiveTab] = useState('profile');
+    const [tabValue, setTabValue] = useState(0);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
-    console.log('user', user);
+    if (isLoading) return (
+        <Box display="flex" height="100vh" alignItems="center" justifyContent="center">
+            <Typography>Loading...</Typography>
+        </Box>
+    );
 
-    if (isLoading) return <div>Loading...</div>;
-    if (!user) return <div>No user data available</div>;
+    if (!user) return (
+        <Box display="flex" height="100vh" alignItems="center" justifyContent="center">
+            <Typography>No user data available</Typography>
+        </Box>
+    );
 
     return (
-        <div className="bg-black container mx-auto px-4 py-8">
-            <div className="max-w-4xl mx-auto">
-                <Card className="bg-black text-white shadow-2xl border-none">
-                    <CardHeader className="bg-black text-white p-6 rounded-t-xl">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4">
-                                <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
-                                    <UserCircle2 size={64} className="text-white" />
-                                </div>
-                                <div>
-                                    <h2 className="text-2xl font-bold">{user.name}</h2>
-                                    <p className="italic text-white/40">@{user.username}</p>
-                                </div>
-                            </div>
-                            <Button
-                                variant="secondary"
-                                className="bg-white/20 hover:bg-white/30 text-white"
-                                onClick={() => setIsUpdateModalOpen(true)}
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+            <StyledPaper elevation={3}>
+                <ProfileHeader>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <Box display="flex" alignItems="center" gap={3}>
+                            <Avatar
+                                sx={{
+                                    width: 80,
+                                    height: 80,
+                                    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                                }}
                             >
-                                <Pencil className="mr-2" size={16} /> Edit Profile
-                            </Button>
-                        </div>
-                    </CardHeader>
+                                <AccountCircle sx={{ fontSize: 50 }} />
+                            </Avatar>
+                            <Box>
+                                <GradientTypography variant="h4" fontWeight="bold">
+                                    {user.name}
+                                </GradientTypography>
+                                <Typography color="text.secondary">@{user.username}</Typography>
+                            </Box>
+                        </Box>
+                        <Button
+                            startIcon={<Edit />}
+                            variant="contained"
+                            onClick={() => setIsUpdateModalOpen(true)}
+                            sx={{ bgcolor: 'primary.main' }}
+                        >
+                            Edit Profile
+                        </Button>
+                    </Box>
+                </ProfileHeader>
 
-                    <Tabs
-                        value={activeTab}
-                        onValueChange={setActiveTab}
-                        className="w-full"
-                    >
-                        <TabsList className="grid w-full grid-cols-2 bg-black text-white">
-                            <TabsTrigger value="profile">Profile Details</TabsTrigger>
-                            <TabsTrigger value="friends">Friends</TabsTrigger>
-                        </TabsList>
+                <Tabs
+                    value={tabValue}
+                    onChange={(e, newValue) => setTabValue(newValue)}
+                    sx={{
+                        borderBottom: 1,
+                        borderColor: 'divider',
+                        '& .MuiTab-root': {
+                            color: 'text.secondary',
+                            '&.Mui-selected': {
+                                color: 'primary.main',
+                            },
+                        },
+                    }}
+                >
+                    <Tab label="Profile Details" />
+                    <Tab label="Friends" />
+                </Tabs>
 
-                        <TabsContent value="profile">
-                            <CardContent className="bg-black p-6 space-y-6">
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <p className="text-sm text-gray-400">Bio</p>
-                                            <p className="italic text-gray-600">
-                                                {user.userbio || 'No bio available'}
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center space-x-3">
-                                            <Mail className="text-blue-500" />
-                                            <div>
-                                                {/* <p className="text-sm text-gray-500">Email</p> */}
-                                                <p className="font-semibold">{user.email}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center space-x-3">
-                                            <Phone className="text-green-500" />
-                                            <div>
-                                                {/* <p className="text-sm text-gray-500">Mobile</p> */}
-                                                <p className="font-semibold">{user.mobile}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-4">
-                                        <div className="flex items-center space-x-3">
-                                            <CalendarDays className="text-purple-500" />
-                                            <div>
-                                                <p className="text-sm text-gray-500">Member Since</p>
-                                                <p className="font-semibold">
-                                                    {new Date(user.createdAt).toLocaleDateString()}
-                                                </p>
-                                            </div>
-                                        </div>
+                <TabPanel value={tabValue} index={0}>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} md={6}>
+                            <Box display="flex" flexDirection="column" gap={2}>
+                                <Card variant="outlined" sx={{ bgcolor: 'background.paper' }}>
+                                    <CardContent>
+                                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                                            Bio
+                                        </Typography>
+                                        <Typography>{user.userbio || 'No bio available'}</Typography>
+                                    </CardContent>
+                                </Card>
 
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </TabsContent>
+                                <Card variant="outlined" sx={{ bgcolor: 'background.paper' }}>
+                                    <CardContent>
+                                        <Box display="flex" alignItems="center" gap={2}>
+                                            <Email color="primary" />
+                                            <Typography>{user.email}</Typography>
+                                        </Box>
+                                    </CardContent>
+                                </Card>
 
-                        <TabsContent value="friends" className="p-6">
-                            {user.friends.length === 0 ? (
-                                <div className="bg-black text-center text-white flex flex-col items-center">
-                                    <Users size={48} className="text-blue-400 mb-4" />
-                                    <p>No friends to display</p>
-                                </div>
-                            ) : (
-                                <FriendListSection
-                                    friends={user.friends}
-                                    onFriendRemoved={(friendId) => {
-                                        // Update your local state/refresh data after friend removal
-                                        // const updatedFriends = user.friends.filter(f => f._id !== friendId);
-                                        // Update your user state here
-                                        console.log('update user state here')
-                                    }}
-                                />
-                            )}
-                        </TabsContent>
-                    </Tabs>
-                </Card>
+                                <Card variant="outlined" sx={{ bgcolor: 'background.paper' }}>
+                                    <CardContent>
+                                        <Box display="flex" alignItems="center" gap={2}>
+                                            <Phone color="primary" />
+                                            <Typography>{user.mobile}</Typography>
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            </Box>
+                        </Grid>
 
-                <UpdateProfileModal
-                    isOpen={isUpdateModalOpen}
-                    onClose={() => setIsUpdateModalOpen(false)}
-                    user={user}
-                />
-            </div>
-        </div>
+                        <Grid item xs={12} md={6}>
+                            <Card variant="outlined" sx={{ bgcolor: 'background.paper' }}>
+                                <CardContent>
+                                    <Box display="flex" alignItems="center" gap={2}>
+                                        <CalendarToday color="primary" />
+                                        <Box>
+                                            <Typography variant="subtitle2" color="text.secondary">
+                                                Member Since
+                                            </Typography>
+                                            <Typography>
+                                                {new Date(user.createdAt).toLocaleDateString()}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    </Grid>
+                </TabPanel>
+
+                <TabPanel value={tabValue} index={1}>
+                    <FriendListSection
+                        friends={user.friends}
+                        onFriendRemoved={(friendId) => console.log('update user state here')}
+                    />
+                </TabPanel>
+            </StyledPaper>
+
+            <UpdateProfileModal
+                open={isUpdateModalOpen}
+                onClose={() => setIsUpdateModalOpen(false)}
+                user={user}
+            />
+        </Container>
     );
 };
 

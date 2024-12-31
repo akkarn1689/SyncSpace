@@ -1,28 +1,40 @@
 import React from 'react';
-import { Avatar, AvatarImage, AvatarFallback } from "@/src/components/ui/avatar";
+import { Avatar, Box, Typography } from '@mui/material';
 
 const ConversationHeader = ({ user }) => {
-    const initials = user?.name?.split(' ').map(n => n[0]).join('') ||
-        user?.username?.[0] || '?';
+   const initials = user?.name?.split(' ').map(n => n[0]).join('') || 
+       user?.username?.[0] || '?';
 
-    return (
-        <div className="px-4 py-2 border-b bg-black text-white flex justify-start items-center gap-3">
-            <Avatar>
-                <AvatarImage
-                    src={`https://ui-avatars.com/api/?name=${user?.name || user?.username}`}
-                />
-                <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-            <div>
-                <h2 className="font-semibold">
-                    {user ? (user.name || user.username) : 'Loading...'}
-                </h2>
-                {user?.email && (
-                    <p className="text-sm text-gray-500">{user.email}</p>
-                )}
-            </div>
-        </div>
-    );
+   return (
+       <Box sx={{
+           px: 2,
+           py: 1,
+           ml: 0.5,
+           borderBottom: 1,
+           bgcolor: 'background.paper',
+           color: 'common.white',
+           display: 'flex',
+           alignItems: 'center',
+           gap: 2
+       }}>
+           <Avatar 
+               src={`https://ui-avatars.com/api/?name=${user?.name || user?.username}`}
+               alt={initials}
+           >
+               {initials}
+           </Avatar>
+           <Box>
+               <Typography variant="subtitle1" fontWeight="600">
+                   {user ? (user.name || user.username) : 'Loading...'}
+               </Typography>
+               {/* {user?.email && (
+                   <Typography variant="body2" color="text.secondary">
+                       {user.email}
+                   </Typography>
+               )} */}
+           </Box>
+       </Box>
+   );
 };
 
 export default ConversationHeader;

@@ -1,6 +1,7 @@
 // FriendRequestsSection.jsx
-import React from 'react';
-import FriendRequestItem from './FriendRequestItem';
+import React from "react";
+import FriendRequestItem from "./FriendRequestItem";
+import { Box, Typography } from "@mui/material";
 
 const FriendRequestsSection = ({
     pendingRequests,
@@ -9,17 +10,22 @@ const FriendRequestsSection = ({
     onDecline,
     isLoading
 }) => {
+    const EmptyState = ({ message }) => (
+        <Box textAlign="center" py={4} color="text.secondary">
+            {message}
+        </Box>
+    );
+
     return (
-        <div className="space-y-6">
-            {/* Pending Requests Section */}
-            <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-white">Pending Requests</h3>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <Box>
+                <Typography variant="h6" color="white" gutterBottom>
+                    Pending Requests
+                </Typography>
                 {pendingRequests.length === 0 ? (
-                    <div className="text-center py-8 text-gray-400">
-                        No pending friend requests
-                    </div>
+                    <EmptyState message="No pending friend requests" />
                 ) : (
-                    <div className="space-y-3">
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         {pendingRequests.map((sender) => (
                             <FriendRequestItem
                                 key={sender._id}
@@ -34,19 +40,18 @@ const FriendRequestsSection = ({
                                 isLoading={isLoading}
                             />
                         ))}
-                    </div>
+                    </Box>
                 )}
-            </div>
+            </Box>
 
-            {/* Sent Requests Section */}
-            <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-white">Sent Requests</h3>
+            <Box>
+                <Typography variant="h6" color="white" gutterBottom>
+                    Sent Requests
+                </Typography>
                 {sentRequests.length === 0 ? (
-                    <div className="text-center py-8 text-gray-400">
-                        No sent friend requests
-                    </div>
+                    <EmptyState message="No sent friend requests" />
                 ) : (
-                    <div className="space-y-3">
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         {sentRequests.map((recipient) => (
                             <FriendRequestItem
                                 key={recipient._id}
@@ -58,10 +63,10 @@ const FriendRequestsSection = ({
                                 type="sent"
                             />
                         ))}
-                    </div>
+                    </Box>
                 )}
-            </div>
-        </div>
+            </Box>
+        </Box>
     );
 };
 

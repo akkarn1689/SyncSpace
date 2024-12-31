@@ -1,27 +1,51 @@
 import React from 'react';
-import { ScrollArea } from "@/src/components/ui/scroll-area";
+import { Box, Typography, Paper } from '@mui/material';
+import MessageIcon from '@mui/icons-material/Message';
 import ConversationListItem from './ConversationListItem';
 
 const ConversationList = ({ conversations, activeConversation, onConversationSelect }) => {
-
-    console.log(`Conversations in list: `, conversations);
-    return (
-        <div className="bg-black text-white min-w-72 w-[30%] border-r flex flex-col">
-            <div className="p-4 border-b">
-                <h1 className="text-xl font-bold">Messages</h1>
-            </div>
-            <ScrollArea className="flex-1">
-                {conversations?.map((conversation) => (
-                    <ConversationListItem
-                        key={conversation._id}
-                        conversation={conversation}
-                        isActive={activeConversation?._id === conversation._id}
-                        onClick={onConversationSelect}
-                    />
-                ))}
-            </ScrollArea>
-        </div>
-    );
+   return (
+       <Paper sx={{
+           bgcolor: 'background.paper',
+           color: 'common.white',
+           minWidth: 280,
+           width: '30%',
+           borderRight: 1,
+           borderColor: 'divider',
+           display: 'flex',
+           flexDirection: 'column',
+           maxHeight: '100vh',
+           '& ::-webkit-scrollbar': { width: 6 },
+           '& ::-webkit-scrollbar-thumb': { bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 3 }
+       }}>
+           <Box sx={{
+               p: 2,
+               borderBottom: 1,
+               borderColor: 'divider',
+               display: 'flex',
+               alignItems: 'center',
+               gap: 1
+           }}>
+               <MessageIcon />
+               <Typography variant="h6" fontWeight="bold">Messages</Typography>
+           </Box>
+           
+           <Box sx={{
+               flexGrow: 1,
+               overflow: 'auto',
+               px: 1
+           }}>
+               {conversations?.map((conversation) => (
+                   <ConversationListItem
+                       key={conversation._id}
+                       conversation={conversation}
+                       isActive={activeConversation?._id === conversation._id}
+                       onClick={onConversationSelect}
+                   />
+               ))}
+           </Box>
+       </Paper>
+   );
 };
 
 export default ConversationList;

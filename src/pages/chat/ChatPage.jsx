@@ -1,9 +1,29 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, styled } from '@mui/material';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import ConversationList from '@/src/features/chat/components/ConversationList';
 import ConversationChatRoom from '@/src/features/chat/components/ChatRoom';
-import axiosInstanceInstance from '../../lib/axios'
-// import { fetchConversations } from '../../services/chatService';
+import axiosInstance from '../../lib/axios';
+
+const ChatContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  minHeight: '80vh',
+  maxHeight: '80vh',
+  // width: '90vw',
+  backgroundColor: theme.palette.common.black,
+  color: theme.palette.common.white,
+  border: `2px solid ${theme.palette.divider}`,
+  borderRadius: theme.shape.borderRadius,
+  padding: theme.spacing(1)
+}));
+
+const EmptyStateContainer = styled(Box)({
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+});
 
 const ChatPage = () => {
   const [conversations, setConversations] = useState([]);
@@ -23,7 +43,6 @@ const ChatPage = () => {
   const fetchConversations = async () => {
     try {
       const response = await axiosInstance.get('/conversations');
-      console.log("response", response);
       return response.data;
     } catch (error) {
       console.error('Error fetching conversations:', error);
@@ -32,22 +51,18 @@ const ChatPage = () => {
   };
 
   const formatConversations = (conversations, userId) => {
-    return conversations?.map(conv => {
-      const otherUser = conv.users.find(u => u._id !== userId);
-      return {
-        id: conv._id,
-        avatar: `https://ui-avatars.com/api/?name=${otherUser.name || otherUser.username}`,
-        title: otherUser.name || otherUser.username,
-        subtitle: otherUser.email,
-        date: new Date(conv.createdAt)
-      };
-    });
+    return conversations?.map(conv => ({
+      id: conv._id,
+      avatar: `https://ui-avatars.com/api/?name=${conv.users.find(u => u._id !== userId).name || conv.users.find(u => u._id !== userId).username}`,
+      title: conv.users.find(u => u._id !== userId).name || conv.users.find(u => u._id !== userId).username,
+      subtitle: conv.users.find(u => u._id !== userId).email,
+      date: new Date(conv.createdAt)
+    }));
   };
 
   useEffect(() => {
     const loadConversations = async () => {
       const data = await fetchConversations();
-      // const formattedConversations = formatConversations(data.conversations, user?._id);
       setConversations(data.conversations);
     };
 
@@ -55,22 +70,24 @@ const ChatPage = () => {
   }, []);
 
   return (
-    <div className="flex justify-center border-2 rounded-md px-2  min-h-[80vh] max-h-[80vh] bg-black text-white w-[90vw]">
+    <ChatContainer>
       <ConversationList
         conversations={conversations}
         activeConversation={activeConversation}
         onConversationSelect={setActiveConversation}
       />
-      <div className="flex-1">
+      <Box flex={1}>
         {activeConversation ? (
           <ConversationChatRoom conversation={activeConversation} />
         ) : (
-          <div className="h-full flex items-center justify-center text-gray-500">
-            Select a conversation to start chatting
-          </div>
+          <EmptyStateContainer>
+            <Typography variant="body1" color="text.secondary">
+              Select a conversation to start chatting
+            </Typography>
+          </EmptyStateContainer>
         )}
-      </div>
-    </div>
+      </Box>
+    </ChatContainer>
   );
 };
 

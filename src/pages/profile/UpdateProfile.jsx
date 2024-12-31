@@ -1,53 +1,40 @@
-import { useSelector, useDispatch } from 'react-redux';
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter
-} from '@/src/components/ui/dialog';
-import { Button } from '../../components/ui/button';
-import { Checkbox } from '../../components/ui/checkbox';
-import { Input } from '../../components/ui/input';
-import { Textarea } from '../../components/ui/textarea';
-import { Label } from '../../components/ui/label';
-import { ImagePlus, Loader2 } from 'lucide-react';
+    Dialog, DialogTitle, DialogContent, DialogActions,
+    Box, Avatar, Typography, Button, IconButton,
+    TextField, CircularProgress
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { AccountCircle, PhotoCamera, Edit } from '@mui/icons-material';
 import { useToast } from '../../hooks/use-toast';
 import axiosInstance from '../../lib/axios';
 import { setUser } from '../../features/auth/authSlice';
 
-const UpdateProfileModal = ({ isOpen, onClose, user }) => {
+const StyledTextField = styled(TextField)(({ theme }) => ({
+    marginBottom: theme.spacing(2),
+    '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+            borderColor: theme.palette.divider,
+        },
+        '&:hover fieldset': {
+            borderColor: theme.palette.primary.main,
+        },
+    },
+}));
+
+const UpdateProfileModal = ({ open, onClose, user }) => {
     const dispatch = useDispatch();
     const { toast } = useToast();
-    // const { user, token, isLoading, error } = useSelector((state) => state.auth);
-
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedFields, setSelectedFields] = useState({
-        name: false,
-        email: false,
-        mobile: false,
-        userbio: false,
-        profilePicture: false
-    });
-
     const [formData, setFormData] = useState({
-        name: user.name || '',
-        email: user.email || '',
-        mobile: user.mobile || '',
-        userbio: user.userbio || '',
+        name: user?.name || '',
+        email: user?.email || '',
+        mobile: user?.mobile || '',
+        userbio: user?.userbio || '',
         profilePicture: null
     });
-
     const [previewImage, setPreviewImage] = useState(null);
-
-
-    const handleCheckboxChange = (field) => {
-        setSelectedFields(prev => ({
-            ...prev,
-            [field]: !prev[field]
-        }));
-    };
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({
@@ -63,12 +50,8 @@ const UpdateProfileModal = ({ isOpen, onClose, user }) => {
                 ...prev,
                 profilePicture: file
             }));
-
-            // Create preview URL
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewImage(reader.result);
-            };
+            reader.onloadend = () => setPreviewImage(reader.result);
             reader.readAsDataURL(file);
         }
     };
@@ -76,62 +59,36 @@ const UpdateProfileModal = ({ isOpen, onClose, user }) => {
     const handleSubmit = async () => {
         try {
             setIsLoading(true);
+            const updates = Object.fromEntries(
+                Object.entries(formData).filter(([key, value]) => 
+                    value !== user[key] && key !== 'profilePicture'
+                )
+            );
 
-            // Create update object only with selected fields
-            const updates = {};
-            Object.keys(selectedFields).forEach(field => {
-                if (selectedFields[field] && field !== 'profilePicture') {
-                    updates[field] = formData[field];
-                }
-            });
-
-            // Only proceed if there are fields to update
-            if (Object.keys(updates).length === 0 && !selectedFields.profilePicture) {
+            if (Object.keys(updates).length === 0) {
                 toast({
-                    title: "No updates selected",
-                    description: "Please select at least one field to update",
-                    variant: "destructive"
+                    title: "No changes detected",
+                    description: "Please make some changes to update",
+                    variant: "warning"
                 });
                 return;
             }
 
-            // console.log("user:", user);
-            // Profile update API call
-            if (Object.keys(updates).length > 0) {
-                const response = await axiosInstance.put(`/users/${user._id}/profile`, { ...updates });
-
-                if (response.status!=200) {
-                    throw new Error('Failed to update profile');
-                }
-
-                // console.log("response:", response);
-
-                if(response.status==200){
-                    dispatch(setUser(response.data.user));
-                }
-
-
-                // onClose();
+            const response = await axiosInstance.put(`/users/${user._id}/profile`, updates);
+            
+            if (response.status === 200) {
+                dispatch(setUser(response.data.user));
+                toast({
+                    title: "Success",
+                    description: "Profile updated successfully"
+                });
+                onClose();
             }
-
-            // Handle profile picture upload separately if selected
-            // if (selectedFields.profilePicture && formData.profilePicture) {
-            //     // You'll implement the profile picture upload logic here
-            //     // This is a placeholder for the actual implementation
-            //     console.log('Profile picture will be uploaded:', formData.profilePicture);
-            // }
-
-            toast({
-                title: "Success",
-                description: "Profile updated successfully",
-            });
-
-            onClose();
         } catch (error) {
             toast({
                 title: "Error",
                 description: error.message || "Failed to update profile",
-                variant: "destructive"
+                variant: "error"
             });
         } finally {
             setIsLoading(false);
@@ -139,157 +96,80 @@ const UpdateProfileModal = ({ isOpen, onClose, user }) => {
     };
 
     return (
-        <Dialog className="" open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Update Profile</DialogTitle>
-                </DialogHeader>
+        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+            <DialogTitle>
+                <Box display="flex" alignItems="center" gap={2}>
+                    <Edit color="primary" />
+                    <Typography variant="h6">Update Profile</Typography>
+                </Box>
+            </DialogTitle>
+            <DialogContent>
+                <Box display="flex" flexDirection="column" gap={2} mt={2}>
+                    <Box display="flex" justifyContent="center" mb={2}>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            id="profile-picture-input"
+                            hidden
+                            onChange={handleImageChange}
+                        />
+                        <label htmlFor="profile-picture-input">
+                            <Avatar
+                                sx={{
+                                    width: 100,
+                                    height: 100,
+                                    cursor: 'pointer',
+                                    '&:hover': { opacity: 0.8 }
+                                }}
+                                src={previewImage}
+                            >
+                                {!previewImage && <AccountCircle sx={{ fontSize: 60 }} />}
+                            </Avatar>
+                        </label>
+                    </Box>
 
-                <div className="grid gap-6 py-4">
-                    {/* Profile Picture Section */}
-                    <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                            <Checkbox
-                                className="bg-white"
-                                id="profilePicture"
-                                checked={selectedFields.profilePicture}
-                                onCheckedChange={() => handleCheckboxChange('profilePicture')}
-                            />
-                            <Label htmlFor="profilePicture">Update Profile Picture</Label>
-                        </div>
-                        {selectedFields.profilePicture && (
-                            <div className="mt-2 space-y-2">
-                                <div className="flex items-center justify-center">
-                                    {previewImage ? (
-                                        <img
-                                            src={previewImage}
-                                            alt="Preview"
-                                            className="w-24 h-24 rounded-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
-                                            <ImagePlus className="h-8 w-8 text-gray-400" />
-                                        </div>
-                                    )}
-                                </div>
-                                <Input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageChange}
-                                    className="mt-2"
-                                />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Name Field */}
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                                <Checkbox
-                                    className="bg-white"
-                                    id="name"
-                                    checked={selectedFields.name}
-                                    onCheckedChange={() => handleCheckboxChange('name')}
-                                />
-                                <Label htmlFor="name">Name</Label>
-                            </div>
-                            <span className="text-sm text-gray-500">{user.name}</span>
-                        </div>
-                        {selectedFields.name && (
-                            <Input
-                                value={formData.name}
-                                onChange={(e) => handleInputChange('name', e.target.value)}
-                                placeholder="Enter new name"
-                            />
-                        )}
-                    </div>
-
-                    {/* Email Field */}
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                                <Checkbox
-                                    className="bg-white"
-                                    id="email"
-                                    checked={selectedFields.email}
-                                    onCheckedChange={() => handleCheckboxChange('email')}
-                                />
-                                <Label htmlFor="email">Email</Label>
-                            </div>
-                            <span className="text-sm text-gray-500">{user.email}</span>
-                        </div>
-                        {selectedFields.email && (
-                            <Input
-                                type="email"
-                                value={formData.email}
-                                onChange={(e) => handleInputChange('email', e.target.value)}
-                                placeholder="Enter new email"
-                            />
-                        )}
-                    </div>
-
-                    {/* Mobile Field */}
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                                <Checkbox
-                                    className="bg-white"
-                                    id="mobile"
-                                    checked={selectedFields.mobile}
-                                    onCheckedChange={() => handleCheckboxChange('mobile')}
-                                />
-                                <Label htmlFor="mobile">Mobile</Label>
-                            </div>
-                            <span className="text-sm text-gray-500">{user.mobile}</span>
-                        </div>
-                        {selectedFields.mobile && (
-                            <Input
-                                type="tel"
-                                value={formData.mobile}
-                                onChange={(e) => handleInputChange('mobile', e.target.value)}
-                                placeholder="Enter new mobile number"
-                            />
-                        )}
-                    </div>
-
-                    {/* Bio Field */}
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                                <Checkbox
-                                    className="bg-white"
-                                    id="userbio"
-                                    checked={selectedFields.userbio}
-                                    onCheckedChange={() => handleCheckboxChange('userbio')}
-                                />
-                                <Label htmlFor="userbio">Bio</Label>
-                            </div>
-                            <span className="text-sm text-gray-500 truncate max-w-[200px]">
-                                {user.userbio || 'No bio'}
-                            </span>
-                        </div>
-                        {selectedFields.userbio && (
-                            <Textarea
-                                value={formData.userbio}
-                                onChange={(e) => handleInputChange('userbio', e.target.value)}
-                                placeholder="Enter new bio"
-                                className="h-20"
-                            />
-                        )}
-                    </div>
-                </div>
-
-                <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSubmit} disabled={isLoading}>
-                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Save Changes
-                    </Button>
-                </DialogFooter>
+                    <StyledTextField
+                        fullWidth
+                        label="Name"
+                        value={formData.name}
+                        onChange={(e) => handleInputChange('name', e.target.value)}
+                    />
+                    <StyledTextField
+                        fullWidth
+                        label="Email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                    />
+                    <StyledTextField
+                        fullWidth
+                        label="Mobile"
+                        value={formData.mobile}
+                        onChange={(e) => handleInputChange('mobile', e.target.value)}
+                    />
+                    <StyledTextField
+                        fullWidth
+                        label="Bio"
+                        multiline
+                        rows={4}
+                        value={formData.userbio}
+                        onChange={(e) => handleInputChange('userbio', e.target.value)}
+                    />
+                </Box>
             </DialogContent>
+            <DialogActions sx={{ p: 3 }}>
+                <Button onClick={onClose} disabled={isLoading}>
+                    Cancel
+                </Button>
+                <Button
+                    variant="contained"
+                    onClick={handleSubmit}
+                    disabled={isLoading}
+                    startIcon={isLoading && <CircularProgress size={20} />}
+                >
+                    {isLoading ? 'Saving...' : 'Save Changes'}
+                </Button>
+            </DialogActions>
         </Dialog>
     );
 };
