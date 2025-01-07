@@ -5,7 +5,7 @@ import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button
 } from '@mui/material';
 import { PersonRemove, AccountCircle } from '@mui/icons-material';
-import axiosInstance from '../../lib/axios';
+// import axiosInstance from '../../lib/axios';
 
 const FriendListItem = ({ friend, onRemoveFriend }) => {
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -14,8 +14,24 @@ const FriendListItem = ({ friend, onRemoveFriend }) => {
     const handleRemoveFriend = async () => {
         try {
             setIsRemoving(true);
-            const response = await axiosInstance.delete(`/users/${friend._id}/remove`);
-            if (!response.ok) throw new Error('Failed to remove friend');
+            const token = localStorage.getItem(import.meta.env.VITE_AUTH_TOKEN_KEY);
+            const response = await fetch(
+                `${import.meta.env.VITE_API_BASE_URL}/users/${friend._id}/remove`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include'
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to remove friend');
+            }
+
             onRemoveFriend(friend._id);
         } catch (error) {
             console.error('Error removing friend:', error);

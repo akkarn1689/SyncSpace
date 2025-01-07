@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { PersonOutline } from '@mui/icons-material';
 import useDebounce from '@/src/hooks/useDebounce';
-import axiosInstance from '../../lib/axios';
+// import axiosInstance from '../../lib/axios';
 
 // SearchUsersListItem Component
 import SearchUsersListItem from './SearchUserListItem';
@@ -28,9 +28,26 @@ const SearchUsers = () => {
   const fetchSearchResults = async (query) => {
     try {
       setIsLoading(true);
-      const response = await axiosInstance.get(`/users/search?query=${query}&page=1&limit=10`);
-      console.log('Search results:', response.data.users);
-      setSearchResults(response.data.users);
+      const token = localStorage.getItem(import.meta.env.VITE_AUTH_TOKEN_KEY);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/users/search?query=${encodeURIComponent(query)}&page=1&limit=10`, 
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          credentials: 'include'
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log('Search results:', data.users);
+      setSearchResults(data.users);
     } catch (error) {
       console.error('Error fetching search results:', error);
       setSearchResults([]);

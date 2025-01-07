@@ -8,7 +8,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { AccountCircle, PhotoCamera, Edit } from '@mui/icons-material';
 import { useToast } from '../../hooks/use-toast';
-import axiosInstance from '../../lib/axios';
+// import axiosInstance from '../../lib/axios';
 import { setUser } from '../../features/auth/authSlice';
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
@@ -56,11 +56,50 @@ const UpdateProfileModal = ({ open, onClose, user }) => {
         }
     };
 
+    // const handleSubmit = async () => {
+    //     try {
+    //         setIsLoading(true);
+    //         const updates = Object.fromEntries(
+    //             Object.entries(formData).filter(([key, value]) => 
+    //                 value !== user[key] && key !== 'profilePicture'
+    //             )
+    //         );
+
+    //         if (Object.keys(updates).length === 0) {
+    //             toast({
+    //                 title: "No changes detected",
+    //                 description: "Please make some changes to update",
+    //                 variant: "warning"
+    //             });
+    //             return;
+    //         }
+
+    //         const response = await axiosInstance.put(`/users/${user._id}/profile`, updates);
+
+    //         if (response.status === 200) {
+    //             dispatch(setUser(response.data.user));
+    //             toast({
+    //                 title: "Success",
+    //                 description: "Profile updated successfully"
+    //             });
+    //             onClose();
+    //         }
+    //     } catch (error) {
+    //         toast({
+    //             title: "Error",
+    //             description: error.message || "Failed to update profile",
+    //             variant: "error"
+    //         });
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
+
     const handleSubmit = async () => {
         try {
             setIsLoading(true);
             const updates = Object.fromEntries(
-                Object.entries(formData).filter(([key, value]) => 
+                Object.entries(formData).filter(([key, value]) =>
                     value !== user[key] && key !== 'profilePicture'
                 )
             );
@@ -74,10 +113,29 @@ const UpdateProfileModal = ({ open, onClose, user }) => {
                 return;
             }
 
-            const response = await axiosInstance.put(`/users/${user._id}/profile`, updates);
-            
+            const token = localStorage.getItem(import.meta.env.VITE_AUTH_TOKEN_KEY);
+            const response = await fetch(
+                `${import.meta.env.VITE_API_BASE_URL}/users/${user._id}/profile`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(updates)
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to update profile');
+            }
+
+            const data = await response.json();
+
             if (response.status === 200) {
-                dispatch(setUser(response.data.user));
+                dispatch(setUser(data.user));
                 toast({
                     title: "Success",
                     description: "Profile updated successfully"

@@ -7,205 +7,221 @@ import { SOCKET_EVENTS } from '../../../services/socket/socketEvents';
 import ConversationHeader from './ConversationHeader';
 import MessageContainer from './MessageContainer';
 import ChatInput from './ChatInput';
-import axiosInstance from '../../../lib/axios';
+// import axiosInstance from '../../../lib/axios';
 
 const ConversationChatRoom = ({ conversation }) => {
-   const [messages, setMessages] = useState([]);
-   const { user, token } = useAuth();
-   const [hasMore, setHasMore] = useState(false);
-   const [page, setPage] = useState(1);
-   const [isTyping, setIsTyping] = useState(false);
-   const [isSending, setIsSending] = useState(false);
-   const { isConnected } = useSocket(token);
+    const [messages, setMessages] = useState([]);
+    const { user, token } = useAuth();
+    const [hasMore, setHasMore] = useState(false);
+    const [page, setPage] = useState(1);
+    const [isTyping, setIsTyping] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+    const { isConnected } = useSocket(token);
 
-   const otherUser = conversation?.users.find(u => u?._id !== user?._id);
+    const otherUser = conversation?.users.find(u => u?._id !== user?._id);
 
-   const formatMessages = (messages) => {
-       return messages?.map(msg => ({
-           id: msg._id,
-           senderId: msg.sender._id,
-           text: msg.message,
-           date: new Date(msg.timestamp),
-           status: msg.status || 'sent'
-       }));
-   };
+    const formatMessages = (messages) => {
+        return messages?.map(msg => ({
+            id: msg._id,
+            senderId: msg.sender._id,
+            text: msg.message,
+            date: new Date(msg.timestamp),
+            status: msg.status || 'sent'
+        }));
+    };
 
-   const fetchMessages = async (conversationId, page) => {
-       try {
-           const response = await axiosInstance.get(
-               `/messages/conversations/${conversationId}?page=${page}&limit=20`
-           );
-           return response.data;
-       } catch (error) {
-           console.error('Error fetching messages:', error);
-           throw error;
-       }
-   };
+    const fetchMessages = async (conversationId, page) => {
+        try {
+            const token = localStorage.getItem(import.meta.env.VITE_AUTH_TOKEN_KEY);
+            const response = await fetch(
+                `${import.meta.env.VITE_API_BASE_URL}/messages/conversations/${conversationId}?page=${page}&limit=20`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include'
+                }
+            );
 
-   const handleIncomingMessage = useCallback((message) => {
-       if (message.sender._id === otherUser?._id) {
-           const newMessage = {
-               id: message._id,
-               senderId: message.sender._id,
-               text: message.message,
-               date: new Date(message.timestamp),
-               status: 'received'
-           };
-           setMessages(prev => [...prev, newMessage]);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to fetch messages');
+            }
 
-           socketService.emit(SOCKET_EVENTS.MESSAGE_DELIVERED, {
-               messageId: message._id,
-               conversationId: conversation._id
-           });
-       }
-   }, [otherUser?._id, conversation._id]);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+            throw error;
+        }
+    };
 
-   const handleMessageDelivered = useCallback((data) => {
-       setMessages(prev => prev.map(msg =>
-           msg.id === data.messageId
-               ? { ...msg, status: 'delivered' }
-               : msg
-       ));
-   }, []);
+    const handleIncomingMessage = useCallback((message) => {
+        if (message.sender._id === otherUser?._id) {
+            const newMessage = {
+                id: message._id,
+                senderId: message.sender._id,
+                text: message.message,
+                date: new Date(message.timestamp),
+                status: 'received'
+            };
+            setMessages(prev => [...prev, newMessage]);
 
-   const handleMessageRead = useCallback((data) => {
-       setMessages(prev => prev.map(msg =>
-           msg.id === data.messageId
-               ? { ...msg, status: 'read' }
-               : msg
-       ));
-   }, []);
+            socketService.emit(SOCKET_EVENTS.MESSAGE_DELIVERED, {
+                messageId: message._id,
+                conversationId: conversation._id
+            });
+        }
+    }, [otherUser?._id, conversation._id]);
 
-   useEffect(() => {
-       if (isConnected && conversation?._id) {
-           socketService.on(SOCKET_EVENTS.CONVERSATION_MESSAGE_RECEIVED, handleIncomingMessage);
-           socketService.on(SOCKET_EVENTS.MESSAGE_DELIVERED, handleMessageDelivered);
-           socketService.on(SOCKET_EVENTS.MESSAGE_READ, handleMessageRead);
+    const handleMessageDelivered = useCallback((data) => {
+        setMessages(prev => prev.map(msg =>
+            msg.id === data.messageId
+                ? { ...msg, status: 'delivered' }
+                : msg
+        ));
+    }, []);
 
-           return () => {
-               socketService.off(SOCKET_EVENTS.CONVERSATION_MESSAGE_RECEIVED, handleIncomingMessage);
-               socketService.off(SOCKET_EVENTS.MESSAGE_DELIVERED, handleMessageDelivered);
-               socketService.off(SOCKET_EVENTS.MESSAGE_READ, handleMessageRead);
-           };
-       }
-   }, [isConnected, conversation?._id, handleIncomingMessage, handleMessageDelivered, handleMessageRead]);
+    const handleMessageRead = useCallback((data) => {
+        setMessages(prev => prev.map(msg =>
+            msg.id === data.messageId
+                ? { ...msg, status: 'read' }
+                : msg
+        ));
+    }, []);
 
-   useEffect(() => {
-       const loadMessages = async () => {
-           if (conversation._id) {
-               try {
-                   const { messages: newMessages, hasMore: moreMessages } = await fetchMessages(conversation._id, page);
-                   const formattedMessages = formatMessages(newMessages, user?._id);
-                   setMessages(prev => {
-                       const uniqueMessages = formattedMessages.filter(
-                           newMsg => !prev.some(
-                               existingMsg =>
-                                   existingMsg.text === newMsg.text &&
-                                   existingMsg.senderId === newMsg.senderId &&
-                                   existingMsg.date.getTime() === newMsg.date.getTime()
-                           )
-                       );
-                       return page === 1 ? formattedMessages : [...prev, ...uniqueMessages];
-                   });
-                   setHasMore(moreMessages);
-               } catch (error) {
-                   console.error('Error loading messages:', error);
-               }
-           }
-       };
+    useEffect(() => {
+        if (isConnected && conversation?._id) {
+            socketService.on(SOCKET_EVENTS.CONVERSATION_MESSAGE_RECEIVED, handleIncomingMessage);
+            socketService.on(SOCKET_EVENTS.MESSAGE_DELIVERED, handleMessageDelivered);
+            socketService.on(SOCKET_EVENTS.MESSAGE_READ, handleMessageRead);
 
-       loadMessages();
-   }, [conversation._id, page, user?._id]);
+            return () => {
+                socketService.off(SOCKET_EVENTS.CONVERSATION_MESSAGE_RECEIVED, handleIncomingMessage);
+                socketService.off(SOCKET_EVENTS.MESSAGE_DELIVERED, handleMessageDelivered);
+                socketService.off(SOCKET_EVENTS.MESSAGE_READ, handleMessageRead);
+            };
+        }
+    }, [isConnected, conversation?._id, handleIncomingMessage, handleMessageDelivered, handleMessageRead]);
 
-   const handleSendMessage = async (recipientId, messageText) => {
-       if (!isConnected || !messageText.trim()) return;
+    useEffect(() => {
+        const loadMessages = async () => {
+            if (conversation._id) {
+                try {
+                    const { messages: newMessages, hasMore: moreMessages } = await fetchMessages(conversation._id, page);
+                    const formattedMessages = formatMessages(newMessages, user?._id);
+                    setMessages(prev => {
+                        const uniqueMessages = formattedMessages.filter(
+                            newMsg => !prev.some(
+                                existingMsg =>
+                                    existingMsg.text === newMsg.text &&
+                                    existingMsg.senderId === newMsg.senderId &&
+                                    existingMsg.date.getTime() === newMsg.date.getTime()
+                            )
+                        );
+                        return page === 1 ? formattedMessages : [...prev, ...uniqueMessages];
+                    });
+                    setHasMore(moreMessages);
+                } catch (error) {
+                    console.error('Error loading messages:', error);
+                }
+            }
+        };
 
-       setIsSending(true);
+        loadMessages();
+    }, [conversation._id, page, user?._id]);
 
-       try {
-           const tempMessage = {
-               id: `temp-${Date.now()}`,
-               senderId: user?._id,
-               text: messageText,
-               date: new Date(),
-               status: 'sending'
-           };
+    const handleSendMessage = async (recipientId, messageText) => {
+        if (!isConnected || !messageText.trim()) return;
 
-           setMessages(prev => [...prev, tempMessage]);
+        setIsSending(true);
 
-           await socketService.sendMessage(otherUser?._id, messageText)
-               .then((response) => {
-                   setMessages(prev => prev.map(msg =>
-                       msg.id === tempMessage.id
-                           ? {
-                               id: response.messageId,
-                               senderId: user?._id,
-                               text: messageText,
-                               date: new Date(response.timestamp),
-                               status: 'sent'
-                           }
-                           : msg
-                   ));
-               })
-               .catch((error) => {
-                   setMessages(prev => prev.map(msg =>
-                       msg.id === tempMessage.id
-                           ? { ...msg, status: 'failed' }
-                           : msg
-                   ));
-                   console.error('Failed to send message:', error);
-               });
-       } catch (error) {
-           console.error('Error sending message:', error);
-       } finally {
-           setIsSending(false);
-       }
-   };
+        try {
+            const tempMessage = {
+                id: `temp-${Date.now()}`,
+                senderId: user?._id,
+                text: messageText,
+                date: new Date(),
+                status: 'sending'
+            };
 
-   const handleRetryMessage = async (messageId) => {
-       const failedMessage = messages.find(msg => msg.id === messageId);
-       if (failedMessage) {
-           setMessages(prev => prev.filter(msg => msg.id !== messageId));
-           await handleSendMessage(failedMessage.text);
-       }
-   };
+            setMessages(prev => [...prev, tempMessage]);
 
-   const loadMoreMessages = async () => {
-       console.log('Loading more messages...');
-   };
+            await socketService.sendMessage(otherUser?._id, messageText)
+                .then((response) => {
+                    setMessages(prev => prev.map(msg =>
+                        msg.id === tempMessage.id
+                            ? {
+                                id: response.messageId,
+                                senderId: user?._id,
+                                text: messageText,
+                                date: new Date(response.timestamp),
+                                status: 'sent'
+                            }
+                            : msg
+                    ));
+                })
+                .catch((error) => {
+                    setMessages(prev => prev.map(msg =>
+                        msg.id === tempMessage.id
+                            ? { ...msg, status: 'failed' }
+                            : msg
+                    ));
+                    console.error('Failed to send message:', error);
+                });
+        } catch (error) {
+            console.error('Error sending message:', error);
+        } finally {
+            setIsSending(false);
+        }
+    };
 
-   return (
-       <Box sx={{
-           display: 'flex',
-           flexDirection: 'column',
-           height: '100%',
-           marginLeft: 1,
-           border: '1px solid',
-           borderRadius: 1,
-           borderColor: 'divider'
-       }}>
-           <ConversationHeader
-               user={otherUser}
-               isTyping={isTyping}
-               isOnline={isConnected}
-           />
-           <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
-               <MessageContainer
-                   messages={messages}
-                   userId={user?._id}
-                   onLoadMore={loadMoreMessages}
-                   hasMore={hasMore}
-                   onRetryMessage={handleRetryMessage}
-               />
-           </Box>
-           <ChatInput
-               onSendMessage={handleSendMessage}
-               recipientId={otherUser?._id}
-               disabled={!isConnected || isSending}
-               placeholder={!isConnected ? "Connecting..." : "Type a message..."}
-           />
-       </Box>
-   );
+    const handleRetryMessage = async (messageId) => {
+        const failedMessage = messages.find(msg => msg.id === messageId);
+        if (failedMessage) {
+            setMessages(prev => prev.filter(msg => msg.id !== messageId));
+            await handleSendMessage(failedMessage.text);
+        }
+    };
+
+    const loadMoreMessages = async () => {
+        console.log('Loading more messages...');
+    };
+
+    return (
+        <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            marginLeft: 1,
+            border: '1px solid',
+            borderRadius: 1,
+            borderColor: 'divider'
+        }}>
+            <ConversationHeader
+                user={otherUser}
+                isTyping={isTyping}
+                isOnline={isConnected}
+            />
+            <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+                <MessageContainer
+                    messages={messages}
+                    userId={user?._id}
+                    onLoadMore={loadMoreMessages}
+                    hasMore={hasMore}
+                    onRetryMessage={handleRetryMessage}
+                />
+            </Box>
+            <ChatInput
+                onSendMessage={handleSendMessage}
+                recipientId={otherUser?._id}
+                disabled={!isConnected || isSending}
+                placeholder={!isConnected ? "Connecting..." : "Type a message..."}
+            />
+        </Box>
+    );
 };
 
 export default ConversationChatRoom;

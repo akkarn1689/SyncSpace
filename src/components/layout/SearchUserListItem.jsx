@@ -16,7 +16,7 @@ import {
   Visibility
 } from '@mui/icons-material';
 import { useToast } from '../../hooks/use-toast';
-import axiosInstance from '../../lib/axios';
+// import axiosInstance from '../../lib/axios';
 import { setUser } from '../../features/auth/authSlice';
 
 const SearchsearchUsersListItem = ({ searchUser, onViewProfile }) => {
@@ -27,21 +27,39 @@ const SearchsearchUsersListItem = ({ searchUser, onViewProfile }) => {
   const onSendFriendRequest = async (searchUser) => {
     console.log('Send friend request to:', searchUser);
     try {
-      const response = await axiosInstance.post(`/users/${searchUser._id}/request`);
-      console.log('Friend request sent:', response.data);
-      // const searchUserData = response.data.searchUsers;
+      const token = localStorage.getItem(import.meta.env.VITE_AUTH_TOKEN_KEY);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${searchUser._id}/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Friend request sent:', data);
 
       if (response.status === 200) {
-        dispatch(setUser(response.data.user));
+        dispatch(setUser(data.user));
         toast({
           title: "Success",
           description: "Profile updated successfully"
         });
       }
     } catch (error) {
-      console.error('Error fetching search results:', error);
+      console.error('Error sending friend request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send friend request",
+        variant: "destructive"
+      });
     }
-  }
+  };
 
   return (
     <ListItem

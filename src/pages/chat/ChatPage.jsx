@@ -3,7 +3,7 @@ import { Box, Typography, styled } from '@mui/material';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import ConversationList from '@/src/features/chat/components/ConversationList';
 import ConversationChatRoom from '@/src/features/chat/components/ChatRoom';
-import axiosInstance from '../../lib/axios';
+// import axiosInstance from '../../lib/axios';
 
 const ChatContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -32,7 +32,24 @@ const ChatPage = () => {
 
   const fetchConversation = async (conversationId) => {
     try {
-      const response = await axiosInstance.get(`/conversations/${conversationId}`);
+      const token = localStorage.getItem(import.meta.env.VITE_AUTH_TOKEN_KEY);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/conversations/${conversationId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          credentials: 'include'
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch conversation');
+      }
+
       return await response.json();
     } catch (error) {
       console.error('Error fetching conversation:', error);
@@ -42,8 +59,26 @@ const ChatPage = () => {
 
   const fetchConversations = async () => {
     try {
-      const response = await axiosInstance.get('/conversations');
-      return response.data;
+      const token = localStorage.getItem(import.meta.env.VITE_AUTH_TOKEN_KEY);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/conversations`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          credentials: 'include'
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch conversations');
+      }
+
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error fetching conversations:', error);
       throw error;
