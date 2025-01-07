@@ -30,9 +30,14 @@ export const SOCKET_EVENTS = {
 
     // Friend request events
     FRIEND_REQUEST_SENT: 'friend_request_sent',
+    FRIEND_REQUEST_RECEIVED: 'friend_request_received',
+    ACCEPT_FRIEND_REQUEST: 'accept_friend_request',
     FRIEND_REQUEST_ACCEPTED: 'friend_request_accepted',
+    REJECT_FRIEND_REQUEST: 'reject_friend_request',
     FRIEND_REQUEST_REJECTED: 'friend_request_rejected',
+    DECLINE_FRIEND_REQUEST: 'decline_friend_request',
     FRIEND_REQUEST_CANCELLED: 'friend_request_cancelled',
+    REMOVE_FRIEND: 'remove_friend',
     FRIEND_REMOVED: 'friend_removed',
 
     // Group events
@@ -112,9 +117,14 @@ export const EVENT_CATEGORIES = {
     ],
     FRIENDS: [
         SOCKET_EVENTS.FRIEND_REQUEST_SENT,
+        SOCKET_EVENTS.FRIEND_REQUEST_RECEIVED,
+        SOCKET_EVENTS.ACCEPT_FRIEND_REQUEST,
         SOCKET_EVENTS.FRIEND_REQUEST_ACCEPTED,
+        SOCKET_EVENTS.REJECT_FRIEND_REQUEST,
         SOCKET_EVENTS.FRIEND_REQUEST_REJECTED,
+        SOCKET_EVENTS.DECLINE_FRIEND_REQUEST,
         SOCKET_EVENTS.FRIEND_REQUEST_CANCELLED,
+        SOCKET_EVENTS.REMOVE_FRIEND,
         SOCKET_EVENTS.FRIEND_REMOVED
     ],
     GROUPS: [

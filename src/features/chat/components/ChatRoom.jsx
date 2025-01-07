@@ -179,7 +179,10 @@ const ConversationChatRoom = ({ conversation }) => {
            display: 'flex',
            flexDirection: 'column',
            height: '100%',
-           borderColor: 'common.white'
+           marginLeft: 1,
+           border: '1px solid',
+           borderRadius: 1,
+           borderColor: 'divider'
        }}>
            <ConversationHeader
                user={otherUser}

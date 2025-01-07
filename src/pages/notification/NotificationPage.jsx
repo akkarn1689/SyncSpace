@@ -1,25 +1,52 @@
-// NotificationPage.jsx
 import React, { useState } from 'react';
-import { 
-  Box, Card, CardContent, Typography, Tabs, Tab, 
-  CircularProgress, styled 
+import {
+  Box, Card, CardContent, Typography, Tabs, Tab,
+  CircularProgress, styled
 } from '@mui/material';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import FriendRequestsSection from './FriendRequestsSection';
 import { useFriendRequests } from '../../hooks/useFriendRequest';
 
 const StyledCard = styled(Card)(({ theme }) => ({
-  backgroundColor: theme.palette.common.black,
+  background: 'inherit',
   color: theme.palette.common.white,
-  boxShadow: theme.shadows[10],
+  boxShadow: 'none',
   border: 'none',
-  borderRadius: theme.shape.borderRadius * 2
+  borderRadius: theme.shape.borderRadius * 2,
+  overflow: 'visible'
 }));
+
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+  backgroundColor: theme.palette.common.black,
+  borderRadius: `${theme.shape.borderRadius * 2}px ${theme.shape.borderRadius * 2}px 0 0`,
+  '& .MuiTabs-indicator': {
+    backgroundColor: theme.palette.primary.main,
+  },
+  padding: 1,
+}));
+
+const StyledTab = styled(Tab)(({ theme }) => ({
+  color: theme.palette.common.white,
+  borderRadius: `${theme.shape.borderRadius * 2}px ${theme.shape.borderRadius * 2}px 0 0`,
+  '&.Mui-selected': {
+    color: theme.palette.primary.main,
+  },
+  '&:hover': {
+    color: theme.palette.primary.light,
+  }
+}));
+
+const StyledCardContent = styled(CardContent)({
+  background: 'inherit',
+  '&:last-child': {
+    paddingBottom: 24
+  }
+});
 
 const NotificationPage = () => {
   const { user, isLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState('requests');
-  
+  const [activeTab, setActiveTab] = useState('notifications');
+
   const {
     pendingRequests,
     sentRequests,
@@ -39,22 +66,17 @@ const NotificationPage = () => {
   return (
     <Box sx={{ maxWidth: '4xl', mx: 'auto', p: 4 }}>
       <StyledCard>
-        {/* <Box p={3}>
-          <Typography variant="h5" component="h1">Notifications</Typography>
-        </Box> */}
-
-        <Tabs 
-          value={activeTab} 
+        <StyledTabs
+          value={activeTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
-          <Tab label="Friend Requests" value="requests" sx={{ color: 'white' }} />
-          <Tab label="Notifications" value="notifications" sx={{ color: 'white' }} />
-        </Tabs>
+          <StyledTab label="Notifications" value="notifications" />
+          <StyledTab label="Friend Requests" value="requests" />
+        </StyledTabs>
 
-        {activeTab === 'requests' ? (
-          <CardContent>
-            <FriendRequestsSection 
+        <StyledCardContent>
+          {activeTab === 'requests' ? (
+            <FriendRequestsSection
               key="friendrequests"
               pendingRequests={pendingRequests}
               sentRequests={sentRequests}
@@ -62,14 +84,12 @@ const NotificationPage = () => {
               onDecline={handleDeclineRequest}
               isLoading={actionLoading}
             />
-          </CardContent>
-        ) : (
-          <CardContent>
+          ) : (
             <Box textAlign="center" py={4} color="text.secondary">
-              Other notification part
+              Notifications
             </Box>
-          </CardContent>
-        )}
+          )}
+        </StyledCardContent>
       </StyledCard>
     </Box>
   );

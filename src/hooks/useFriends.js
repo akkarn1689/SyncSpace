@@ -29,9 +29,9 @@ export const useFriends = () => {
         };
     }, []);
 
-    const sendFriendRequest = useCallback((recipientId) => {
-        socketService.sendFriendRequest(recipientId);
-    }, []);
+    // const sendFriendRequest = useCallback((recipientId) => {
+    //     socketService.sendFriendRequest(recipientId);
+    // }, []);
 
     const respondToFriendRequest = useCallback((requestId, accept) => {
         if (accept) {
@@ -45,7 +45,6 @@ export const useFriends = () => {
     return { 
         friendRequests, 
         onlineFriends, 
-        sendFriendRequest, 
         respondToFriendRequest 
     };
 };

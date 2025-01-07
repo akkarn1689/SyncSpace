@@ -17,9 +17,9 @@ import zIndex from '@mui/material/styles/zIndex';
 const MessageBubble = styled(Paper)(({ theme, isOutgoing }) => ({
   position: 'relative',
   maxWidth: '70%',
-  padding: theme.spacing(1, 1),
-  backgroundColor: isOutgoing ? theme.palette.grey[200] : theme.palette.grey[900],
-  color: isOutgoing ? theme.palette.primary.contrastText : theme.palette.common.white,
+  padding: theme.spacing(0.2, 1),
+  backgroundColor: isOutgoing ? theme.palette.grey[900] : theme.palette.grey[900],
+  color: isOutgoing ? theme.palette.common.white : theme.palette.common.white,
   borderRadius: theme.spacing(1.5),
   [isOutgoing ? 'borderTopRightRadius' : 'borderTopLeftRadius']: theme.spacing(0.05),
   transition: 'transform 0.2s ease-in-out',
@@ -122,8 +122,8 @@ const Message = memo(forwardRef(({
           display: 'flex', 
           justifyContent: 'flex-end', 
           alignItems: 'center', 
-          gap: 0.1, 
-          mt: 0.1 
+          // gap: 0.1, 
+          // mt: 0.1 
         }}>
           <Typography
             variant="caption"

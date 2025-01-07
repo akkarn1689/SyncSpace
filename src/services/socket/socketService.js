@@ -186,25 +186,25 @@ class SocketService {
         this.socket.emit(SOCKET_EVENTS.LEAVE_GROUP, groupId);
     }
 
-    sendFriendRequest(recipientId) {
-        if (!this.isConnected()) {
-            throw new Error('Socket is not connected');
-        }
-        this.socket.emit(SOCKET_EVENTS.FRIEND_REQUEST_SENT, { recipientId });
-    }
+    // sendFriendRequest(recipientId) {
+    //     if (!this.isConnected()) {
+    //         throw new Error('Socket is not connected');
+    //     }
+    //     this.socket.emit(SOCKET_EVENTS.FRIEND_REQUEST_SENT, { recipientId });
+    // }
 
     acceptFriendRequest(requestId) {
         if (!this.isConnected()) {
             throw new Error('Socket is not connected');
         }
-        this.socket.emit(SOCKET_EVENTS.FRIEND_REQUEST_ACCEPTED, { requestId });
+        this.socket.emit(SOCKET_EVENTS.ACCEPT_FRIEND_REQUEST, { requestId });
     }
 
     rejectFriendRequest(requestId) {
         if (!this.isConnected()) {
             throw new Error('Socket is not connected');
         }
-        this.socket.emit(SOCKET_EVENTS.FRIEND_REQUEST_REJECTED, { requestId });
+        this.socket.emit(SOCKET_EVENTS.REJECT_FRIEND_REQUEST, { requestId });
     }
 
     markNotificationAsRead(notificationId) {

@@ -110,7 +110,7 @@ const MessageContainer = ({
   }, [messages, userId]);
 
   return (
-    <Box position="relative" height="100%" display="flex" flexDirection="column">
+    <Box position="relative" height="100%" display="flex" flexDirection="column" sx={{mx: 0}}>
       <ScrollArea
         ref={scrollViewportRef}
         onScroll={handleScroll}

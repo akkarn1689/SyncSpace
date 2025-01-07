@@ -40,7 +40,7 @@ export const SocketProvider = ({ children }) => {
         sendGroupMessage: socketService.sendGroupMessage.bind(socketService),
         joinGroup: socketService.joinGroup.bind(socketService),
         leaveGroup: socketService.leaveGroup.bind(socketService),
-        sendFriendRequest: socketService.sendFriendRequest.bind(socketService),
+        // sendFriendRequest: socketService.sendFriendRequest.bind(socketService),
         acceptFriendRequest: socketService.acceptFriendRequest.bind(socketService),
         rejectFriendRequest: socketService.rejectFriendRequest.bind(socketService),
         markNotificationAsRead: socketService.markNotificationAsRead.bind(socketService),

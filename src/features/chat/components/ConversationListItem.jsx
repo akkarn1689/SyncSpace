@@ -13,7 +13,7 @@ const ConversationListItem = ({ conversation, isActive, onClick }) => {
                px: 1,
                py: 0.8,
                my: 0.5,
-               mx: 0.2,
+            //    mx: 0.1,
                borderRadius: 1,
             //    border: 1,
                borderColor: isActive ? 'primary.main' : 'divider',

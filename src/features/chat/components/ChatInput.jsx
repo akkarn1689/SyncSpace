@@ -22,11 +22,12 @@ const ChatInput = ({ onSendMessage, recipientId }) => {
      component="form"
      onSubmit={handleSubmit}
      sx={{
-       p: 2,
+       px: 1.5,
+       py: 1,
        borderTop: 1,
        borderColor: 'divider',
        display: 'flex',
-       gap: 1
+       gap: 0.5
      }}
    >
      <IconButton type="button" sx={{ bgcolor: 'background.paper' }}>

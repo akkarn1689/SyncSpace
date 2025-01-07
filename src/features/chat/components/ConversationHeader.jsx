@@ -9,7 +9,7 @@ const ConversationHeader = ({ user }) => {
        <Box sx={{
            px: 2,
            py: 1,
-           ml: 0.5,
+        //    ml: 0.5,
            borderBottom: 1,
            bgcolor: 'background.paper',
            color: 'common.white',

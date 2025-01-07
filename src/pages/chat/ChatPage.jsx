@@ -11,10 +11,10 @@ const ChatContainer = styled(Box)(({ theme }) => ({
   minHeight: '80vh',
   maxHeight: '80vh',
   // width: '90vw',
-  backgroundColor: theme.palette.common.black,
+  backgroundColor: 'inherit',
   color: theme.palette.common.white,
-  border: `2px solid ${theme.palette.divider}`,
-  borderRadius: theme.shape.borderRadius,
+  // border: `2px solid ${theme.palette.divider}`,
+  // borderRadius: theme.shape.borderRadius,
   padding: theme.spacing(1)
 }));
 

@@ -19,7 +19,8 @@ const ConversationList = ({ conversations, activeConversation, onConversationSel
            '& ::-webkit-scrollbar-thumb': { bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 3 }
        }}>
            <Box sx={{
-               p: 2,
+               px: 2,
+               py: 1.6,
                borderBottom: 1,
                borderColor: 'divider',
                display: 'flex',
