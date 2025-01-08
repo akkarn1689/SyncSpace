@@ -23,9 +23,9 @@ const SearchsearchUsersListItem = ({ searchUser, onViewProfile }) => {
   const dispatch = useDispatch();
   const { toast } = useToast();
 
-  console.log('Search User:', searchUser);
+  // console.log('Search User:', searchUser);
   const onSendFriendRequest = async (searchUser) => {
-    console.log('Send friend request to:', searchUser);
+    // console.log('Send friend request to:', searchUser);
     try {
       const token = localStorage.getItem(import.meta.env.VITE_AUTH_TOKEN_KEY);
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${searchUser._id}/request`, {
@@ -42,7 +42,7 @@ const SearchsearchUsersListItem = ({ searchUser, onViewProfile }) => {
       }
 
       const data = await response.json();
-      console.log('Friend request sent:', data);
+      // console.log('Friend request sent:', data);
 
       if (response.status === 200) {
         dispatch(setUser(data.user));

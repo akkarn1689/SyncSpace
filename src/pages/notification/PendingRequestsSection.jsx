@@ -14,7 +14,7 @@ const PendingRequestsSection = ({ requests, onAccept, onDecline, isLoading }) =>
     const theme = useTheme();
     const [isExpanded, setIsExpanded] = useState(true);
 
-    console.log("Requests: ", requests);
+    // console.log("Requests: ", requests);
 
     const EmptyState = () => (
         <Box textAlign="center" py={4} color="text.secondary">

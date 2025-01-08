@@ -46,7 +46,7 @@ const SearchUsers = () => {
       }
   
       const data = await response.json();
-      console.log('Search results:', data.users);
+      // console.log('Search results:', data.users);
       setSearchResults(data.users);
     } catch (error) {
       console.error('Error fetching search results:', error);

@@ -23,7 +23,7 @@ export const SocketProvider = ({ children }) => {
 
     // Disconnection handler
     const handleDisconnect = useCallback((reason) => {
-        console.log('Socket disconnected:', reason);
+        // console.log('Socket disconnected:', reason);
         setIsConnected(false);
     }, []);
 
@@ -59,7 +59,7 @@ export const SocketProvider = ({ children }) => {
         // Only attempt connection if token exists
         if (token) {
             try {
-                console.log('Attempting socket connection with token');
+                // console.log('Attempting socket connection with token');
                 socketService.connect(token);
 
                 // Add event listeners

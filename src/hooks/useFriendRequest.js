@@ -105,7 +105,7 @@ export const useFriendRequests = (user) => {
 
     const handleAcceptRequest = async (requestId) => {
         try {
-            console.log("In handle accept request: ", requestId);
+            // console.log("In handle accept request: ", requestId);
             setActionLoading(true);
             
             if (!socketService.isConnected()) {

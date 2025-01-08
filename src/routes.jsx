@@ -11,7 +11,7 @@ import NotificationPage from './pages/notification/NotificationPage';
 
 const ProtectedRoute = ({ children }) => {
     const isAuthenticated = useSelector((state) => !!state.auth.token);
-    console.log('ProtectedRoute isAuthenticated:', isAuthenticated); // Debug route protection
+    // console.log('ProtectedRoute isAuthenticated:', isAuthenticated); // Debug route protection
     return isAuthenticated ? children : <Navigate to="/auth" replace />;
 };
 

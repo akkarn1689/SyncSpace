@@ -10,16 +10,16 @@ export const useSocket = (token) => {
     useEffect(() => {
         if (token) {
             try {
-                console.log('Attempting socket connection with token');
+                // console.log('Attempting socket connection with token');
                 socketService.connect(token);
 
                 const handleConnect = () => {
-                    console.log('Socket connected successfully');
+                    // console.log('Socket connected successfully');
                     setIsConnected(true);
                 };
 
                 const handleDisconnect = (reason) => {
-                    console.log('Socket disconnected:', reason);
+                    // console.log('Socket disconnected:', reason);
                     setIsConnected(false);
                 };
 

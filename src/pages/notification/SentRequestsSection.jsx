@@ -13,7 +13,7 @@ import { ChevronDown, ChevronUp, Ban } from "lucide-react";
 const SentRequestsSection = ({ requests, onWithdraw, isLoading }) => {
     const theme = useTheme();
     const [isExpanded, setIsExpanded] = useState(false);
-    console.log("Sent Requests: ", requests);
+    // console.log("Sent Requests: ", requests);
 
     const EmptyState = () => (
         <Box textAlign="center" py={4} color="text.secondary">
@@ -22,7 +22,7 @@ const SentRequestsSection = ({ requests, onWithdraw, isLoading }) => {
     );
 
     const RequestItem = ({ request }) => {
-        console.log("Request: ", request);
+        // console.log("Request: ", request);
 
         return (
             <Box

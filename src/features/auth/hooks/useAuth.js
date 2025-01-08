@@ -27,9 +27,9 @@ export const useAuth = () => {
             }
 
             const data = await response.json();
-            console.log('Login response:', data);
+            // console.log('Login response:', data);
             dispatch(setCredentials(data));
-            console.log('Token stored in localStorage:', localStorage.getItem('auth_token'));
+            // console.log('Token stored in localStorage:', localStorage.getItem('auth_token'));
             navigate('/profile');
         } catch (err) {
             console.error('Login error:', err.message || 'Login failed');
@@ -57,7 +57,7 @@ export const useAuth = () => {
             }
 
             const data = await response.json();
-            console.log(data);
+            // console.log(data);
             dispatch(setCredentials(data));
             navigate('/profile');
         } catch (err) {
